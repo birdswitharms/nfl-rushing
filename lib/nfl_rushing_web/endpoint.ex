@@ -1,6 +1,8 @@
 defmodule NflRushingWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :nfl_rushing
 
+  socket "/live", Phoenix.LiveView.Socket
+
   socket "/socket", NflRushingWeb.UserSocket,
     websocket: true,
     longpoll: false

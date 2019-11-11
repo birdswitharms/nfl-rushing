@@ -15,6 +15,7 @@ config :nfl_rushing, NflRushingWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "CmF86Iv1HuUycochP8LF0BmdZbCFhAKcKdN5SiDRewYM/oYpsV5czc4az/c0xxeO",
   render_errors: [view: NflRushingWeb.ErrorView, accepts: ~w(html json)],
+  live_view: [signing_salt: "r80ThGHhOQfP4/U9gHhH8cobEW9NRB5jDN2k6vIpHyfiZ8jJrgyVR/i0ZnYVskpH"],
   pubsub: [name: NflRushing.PubSub, adapter: Phoenix.PubSub.PG2]
 
 # Configures Elixir's Logger
@@ -24,6 +25,10 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+# enable live view
+config :phoenix,
+  template_engines: [leex: Phoenix.LiveView.Engine]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
