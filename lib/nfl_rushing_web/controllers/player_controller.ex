@@ -1,11 +1,8 @@
 defmodule NflRushingWeb.PlayerController do
   use NflRushingWeb, :controller
   alias NflRushing.PlayerService
-  alias NflRushingWeb.PlayerLive
 
-  def index(conn, params) do
-    IO.inspect(params, label: :params_export)
-
+  def index(conn, _params) do
     redirect(conn, to: "/live")
   end
 
@@ -14,14 +11,14 @@ defmodule NflRushingWeb.PlayerController do
       "page_size" => page_size,
       "query" => query,
       "sort_by" => sort_by,
-      "sort_order" => sort_order} = params
+      "sort_order" => sort_order}
       ) do
 
     csv =
       PlayerService.get_stats()
-      |> PlayerLive.filter(query)
-      |> PlayerLive.sort(sort_by, String.to_atom(sort_order))
-      |> PlayerLive.paginate(String.to_integer(page), String.to_integer(page_size))
+      |> PlayerService.filter(query)
+      |> PlayerService.sort(sort_by, String.to_atom(sort_order))
+      |> PlayerService.paginate(String.to_integer(page), String.to_integer(page_size))
       |> CSV.encode(headers: true)
       |> Enum.to_list()
 

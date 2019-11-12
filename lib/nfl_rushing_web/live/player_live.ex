@@ -22,63 +22,63 @@ defmodule NflRushingWeb.PlayerLive do
         <tr class="column">
           <th phx-click="sort" phx-value-player="Player">
             Player
-            <%= sort_order_icon("Player", @sort_by, @sort_order) %>
+            <%= PlayerService.sort_order_icon("Player", @sort_by, @sort_order) %>
           </th>
           <th phx-click="sort" phx-value-team="Team">
             Team
-            <%= sort_order_icon("Team", @sort_by, @sort_order) %>
+            <%= PlayerService.sort_order_icon("Team", @sort_by, @sort_order) %>
           </th>
           <th phx-click="sort" phx-value-pos="Pos">
             Position
-            <%= sort_order_icon("Pos", @sort_by, @sort_order) %>
+            <%= PlayerService.sort_order_icon("Pos", @sort_by, @sort_order) %>
           </th>
           <th phx-click="sort" phx-value-att-g="Att/G">
             Rushing Attempts / Game
-            <%= sort_order_icon("Att/G", @sort_by, @sort_order) %>
+            <%= PlayerService.sort_order_icon("Att/G", @sort_by, @sort_order) %>
           </th>
           <th phx-click="sort" phx-value-att="Att">
             Rushing Attempts
-            <%= sort_order_icon("Att", @sort_by, @sort_order) %>
+            <%= PlayerService.sort_order_icon("Att", @sort_by, @sort_order) %>
           </th>
           <th phx-click="sort" phx-value-yds="Yds">
             Total Rushing Yards
-            <%= sort_order_icon("Yds", @sort_by, @sort_order) %>
+            <%= PlayerService.sort_order_icon("Yds", @sort_by, @sort_order) %>
           </th>
           <th phx-click="sort" phx-value-avg="Avg">
             Rushing Avg Yards / Attempt
-            <%= sort_order_icon("Avg", @sort_by, @sort_order) %>
+            <%= PlayerService.sort_order_icon("Avg", @sort_by, @sort_order) %>
           </th>
           <th phx-click="sort" phx-value-yds-g="Yds/G">
             Rushing Yards / Game
-            <%= sort_order_icon("Yds/G", @sort_by, @sort_order) %>
+            <%= PlayerService.sort_order_icon("Yds/G", @sort_by, @sort_order) %>
           </th>
           <th phx-click="sort" phx-value-td="TD">
             Total Rushing Touchdowns
-            <%= sort_order_icon("TD", @sort_by, @sort_order) %>
+            <%= PlayerService.sort_order_icon("TD", @sort_by, @sort_order) %>
           </th>
           <th phx-click="sort" phx-value-lng="Lng">
             Longest Rush
-            <%= sort_order_icon("Lng", @sort_by, @sort_order) %>
+            <%= PlayerService.sort_order_icon("Lng", @sort_by, @sort_order) %>
           </th>
           <th phx-click="sort" phx-value-1st="1st">
             Rushing First Downs
-            <%= sort_order_icon("1st", @sort_by, @sort_order) %>
+            <%= PlayerService.sort_order_icon("1st", @sort_by, @sort_order) %>
           </th>
           <th phx-click="sort" phx-value-1st%="1st%">
             Rushing First Down %
-            <%= sort_order_icon("1st%", @sort_by, @sort_order) %>
+            <%= PlayerService.sort_order_icon("1st%", @sort_by, @sort_order) %>
           </th>
           <th phx-click="sort" phx-value-20="20+">
             Rushing 20+ Yards Each
-            <%= sort_order_icon("20+", @sort_by, @sort_order) %>
+            <%= PlayerService.sort_order_icon("20+", @sort_by, @sort_order) %>
           </th>
           <th phx-click="sort" phx-value-40="40+">
             Rushing 40+ Yards Each
-            <%= sort_order_icon("40+", @sort_by, @sort_order) %>
+            <%= PlayerService.sort_order_icon("40+", @sort_by, @sort_order) %>
           </th>
           <th phx-click="sort" phx-value-fum="FUM">
             Rushing Fumbles
-            <%= sort_order_icon("FUM", @sort_by, @sort_order) %>
+            <%= PlayerService.sort_order_icon("FUM", @sort_by, @sort_order) %>
           </th>
         </tr>
       </thead>
@@ -107,7 +107,7 @@ defmodule NflRushingWeb.PlayerLive do
 
 
     <nav class="float-left">
-      <%= for page <- (1..number_of_pages(assigns)) do %>
+      <%= for page <- (1..PlayerService.number_of_pages(assigns)) do %>
         <%= if page == @page do %>
           <%= page %>
         <% else %>
@@ -144,6 +144,7 @@ defmodule NflRushingWeb.PlayerLive do
     sort_order = params["sort_order"] == "asc" && :asc || :desc
     page = String.to_integer(params["page"] || "1")
     page_size = String.to_integer(params["page_size"] || "10")
+
     {:noreply, assign(socket, query: query, sort_by: sort_by, sort_order: sort_order, page: page, page_size: page_size)}
   end
 
@@ -310,49 +311,9 @@ defmodule NflRushingWeb.PlayerLive do
   end
 
   defp rows(%{data: data, query: query, sort_by: sort_by, sort_order: sort_order, page: page, page_size: page_size}) do
-    data |> filter(query) |> sort(sort_by, sort_order) |> IO.inspect(label: :rows) |> paginate(page, page_size)
+    data
+    |> PlayerService.filter(query)
+    |> PlayerService.sort(sort_by, sort_order)
+    |> PlayerService.paginate(page, page_size)
   end
-
-  def filter(rows, query) do
-    rows |> Enum.filter(&(String.match?(&1["Player"], ~r/#{query}/i)))
-  end
-
-  def sort(rows, sort_by, :asc) when sort_by == "Lng" do
-    rows
-    |> Enum.map(&format_lng(&1))
-    |> Enum.sort(&(&1[sort_by] > &2[sort_by]))
-  end
-  def sort(rows, sort_by, :desc) when sort_by == "Lng" do
-    rows
-    |> Enum.map(&format_lng(&1))
-    |> Enum.sort(&(&1[sort_by] <= &2[sort_by]))
-  end
-  def sort(rows, sort_by, :asc), do: rows |> Enum.sort(&(&1[sort_by] > &2[sort_by]))
-  def sort(rows, sort_by, :desc), do: rows |> Enum.sort(&(&1[sort_by] <= &2[sort_by]))
-
-  def paginate(rows, page, page_size), do: rows |> Enum.slice((page - 1) * page_size, page_size)
-
-  def number_of_pages(%{data: data, query: query, page_size: page_size}) do
-    number_of_rows = data |> filter(query) |> length
-    (number_of_rows / page_size) + 1 |> trunc
-  end
-
-  defp format_lng(%{"Lng" => value} = row) do
-    string_value = ensure_string(value)
-    length = String.length(string_value)
-    replaced_value =
-      case String.ends_with?(string_value, "T") do
-        true -> String.slice(value, 0, length-1)
-        _ -> string_value
-      end
-
-    Map.replace(row, "Lng", String.to_integer(replaced_value))
-  end
-
-  defp ensure_string(value) when is_integer(value), do: Integer.to_string(value)
-  defp ensure_string(value) when is_binary(value), do: value
-
-  defp sort_order_icon(column, sort_by, :asc) when column == sort_by, do: "▲"
-  defp sort_order_icon(column, sort_by, :desc) when column == sort_by, do: "▼"
-  defp sort_order_icon(_, _, _), do: ""
 end
