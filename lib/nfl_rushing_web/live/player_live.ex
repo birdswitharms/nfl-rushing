@@ -3,6 +3,7 @@ defmodule NflRushingWeb.PlayerLive do
 
   alias NflRushing.PlayerService
   alias NflRushingWeb.Router.Helpers, as: Routes
+  # <a href="/export?query=Andrew&sort_by=Player&sort_order=desc&page=1&page_size=10" download>
 
   def render(assigns) do
     ~L"""
@@ -12,7 +13,9 @@ defmodule NflRushingWeb.PlayerLive do
     </section>
     <form phx-change="search"><input type="text" name="query" value="<%= @query %>" placeholder="Search..." /></form>
 
-    <button phx-click="export">Export CSV</button>
+    <a href="/export?query=<%= @query %>&sort_by=<%= @sort_by %>&sort_order=<%= @sort_order %>&page=<%= @page %>&page_size=<%= @page_size %>" download>
+      <button>Export CSV</button>
+    </a>
 
     <table>
       <thead>
@@ -149,6 +152,7 @@ defmodule NflRushingWeb.PlayerLive do
   end
 
   # When the column that is used for sorting is clicked again, we reverse the sort order
+  # For some reason we get extra meta data we don't need so we have to be explicit here
   def handle_event("sort", %{"player" => player}, %{assigns: %{sort_by: sort_by, sort_order: :asc}} = socket) when player == sort_by do
     {:noreply, assign(socket, sort_by: sort_by, sort_order: :desc)}
   end
@@ -295,8 +299,6 @@ defmodule NflRushingWeb.PlayerLive do
     {:noreply, redirect_with_attrs(socket, page_size: String.to_integer(page_size), page: 1)}
   end
 
-
-
   defp redirect_with_attrs(socket, attrs) do
     query = attrs[:query] || socket.assigns[:query]
     sort_by = attrs[:sort_by] || socket.assigns[:sort_by]
@@ -311,16 +313,16 @@ defmodule NflRushingWeb.PlayerLive do
     data |> filter(query) |> sort(sort_by, sort_order) |> paginate(page, page_size)
   end
 
-  defp filter(rows, query) do
+  def filter(rows, query) do
     rows |> Enum.filter(&(String.match?(&1["Player"], ~r/#{query}/i)))
   end
 
-  defp sort(rows, sort_by, :asc), do: rows |> Enum.sort(&(&1[sort_by] > &2[sort_by]))
-  defp sort(rows, sort_by, :desc), do: rows |> Enum.sort(&(&1[sort_by] <= &2[sort_by]))
+  def sort(rows, sort_by, :asc), do: rows |> Enum.sort(&(&1[sort_by] > &2[sort_by]))
+  def sort(rows, sort_by, :desc), do: rows |> Enum.sort(&(&1[sort_by] <= &2[sort_by]))
 
-  defp paginate(rows, page, page_size), do: rows |> Enum.slice((page - 1) * page_size, page_size)
+  def paginate(rows, page, page_size), do: rows |> Enum.slice((page - 1) * page_size, page_size)
 
-  defp number_of_pages(%{data: data, query: query, page_size: page_size}) do
+  def number_of_pages(%{data: data, query: query, page_size: page_size}) do
     number_of_rows = data |> filter(query) |> length
     (number_of_rows / page_size) + 1 |> trunc
   end

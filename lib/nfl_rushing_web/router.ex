@@ -18,10 +18,7 @@ defmodule NflRushingWeb.Router do
 
     get "/", PlayerController, :index
     live "/live", PlayerLive
-  end
+    get "/export", PlayerController, :export
 
-  # Other scopes may use custom stacks.
-  # scope "/api", NflRushingWeb do
-  #   pipe_through :api
-  # end
+  end
 end
