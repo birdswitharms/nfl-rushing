@@ -310,13 +310,23 @@ defmodule NflRushingWeb.PlayerLive do
   end
 
   defp rows(%{data: data, query: query, sort_by: sort_by, sort_order: sort_order, page: page, page_size: page_size}) do
-    data |> filter(query) |> sort(sort_by, sort_order) |> paginate(page, page_size)
+    data |> filter(query) |> sort(sort_by, sort_order) |> IO.inspect(label: :rows) |> paginate(page, page_size)
   end
 
   def filter(rows, query) do
     rows |> Enum.filter(&(String.match?(&1["Player"], ~r/#{query}/i)))
   end
 
+  def sort(rows, sort_by, :asc) when sort_by == "Lng" do
+    rows
+    |> Enum.map(&format_lng(&1))
+    |> Enum.sort(&(&1[sort_by] > &2[sort_by]))
+  end
+  def sort(rows, sort_by, :desc) when sort_by == "Lng" do
+    rows
+    |> Enum.map(&format_lng(&1))
+    |> Enum.sort(&(&1[sort_by] <= &2[sort_by]))
+  end
   def sort(rows, sort_by, :asc), do: rows |> Enum.sort(&(&1[sort_by] > &2[sort_by]))
   def sort(rows, sort_by, :desc), do: rows |> Enum.sort(&(&1[sort_by] <= &2[sort_by]))
 
@@ -326,6 +336,21 @@ defmodule NflRushingWeb.PlayerLive do
     number_of_rows = data |> filter(query) |> length
     (number_of_rows / page_size) + 1 |> trunc
   end
+
+  defp format_lng(%{"Lng" => value} = row) do
+    string_value = ensure_string(value)
+    length = String.length(string_value)
+    replaced_value =
+      case String.ends_with?(string_value, "T") do
+        true -> String.slice(value, 0, length-1)
+        _ -> string_value
+      end
+
+    Map.replace(row, "Lng", String.to_integer(replaced_value))
+  end
+
+  defp ensure_string(value) when is_integer(value), do: Integer.to_string(value)
+  defp ensure_string(value) when is_binary(value), do: value
 
   defp sort_order_icon(column, sort_by, :asc) when column == sort_by, do: "▲"
   defp sort_order_icon(column, sort_by, :desc) when column == sort_by, do: "▼"
