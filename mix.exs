@@ -44,6 +44,7 @@ defmodule NflRushing.MixProject do
       {:jason, "~> 1.0"},
       {:phoenix_live_view, github: "phoenixframework/phoenix_live_view"},
       {:floki, ">= 0.0.0", only: :test},
+      {:csv, "~> 2.0"},
       {:plug_cowboy, "~> 2.0"}
     ]
   end
