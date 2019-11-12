@@ -4,7 +4,6 @@ defmodule NflRushingWeb.Router do
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
-    plug :fetch_flash
     plug Phoenix.LiveView.Flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
@@ -18,6 +17,7 @@ defmodule NflRushingWeb.Router do
     pipe_through :browser
 
     get "/", PlayerController, :index
+    live "/live", PlayerLive
   end
 
   # Other scopes may use custom stacks.

@@ -23,6 +23,7 @@ defmodule NflRushingWeb do
 
       import Plug.Conn
       import NflRushingWeb.Gettext
+      import Phoenix.LiveView.Controller
       alias NflRushingWeb.Router.Helpers, as: Routes
     end
   end
@@ -41,6 +42,7 @@ defmodule NflRushingWeb do
 
       import NflRushingWeb.ErrorHelpers
       import NflRushingWeb.Gettext
+      import Phoenix.LiveView
       alias NflRushingWeb.Router.Helpers, as: Routes
     end
   end
@@ -50,6 +52,7 @@ defmodule NflRushingWeb do
       use Phoenix.Router
       import Plug.Conn
       import Phoenix.Controller
+      import Phoenix.LiveView.Router
     end
   end
 
